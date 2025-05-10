@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interactive DOM Traversal and Manipulation</title>
+  <style>
+   body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 40px 20px;
+  background: linear-gradient(to right, #eef2f3, #dfe6e9);
+  color: #2f3640;
+  text-align: center;
+}
+
+.header-container {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 30px;
+  margin: 0 auto 30px;
+  width: 70%;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border: none;
+}
+
+.header-container header h1 {
+  margin-bottom: 10px;
+  color: #34495e;
+  font-size: 2em;
+}
+
+.header-container p {
+  margin: 8px 0;
+  text-align: left;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.grandparent {
+  background-color: #f3e5f5;
+  padding: 25px;
+  margin: 20px auto;
+  width: 70%;
+  border-left: 6px solid #8e24aa;
+  border-radius: 8px;
+}
+
+.parent {
+  background-color: #e0f7fa;
+  padding: 20px;
+  margin: 15px;
+  border-left: 5px solid #00897b;
+  border-radius: 6px;
+}
+
+.child {
+  background-color: #ffe0b2;
+  padding: 15px;
+  margin: 10px;
+  border-left: 4px solid #ef6c00;
+  border-radius: 5px;
+}
+
+.highlight {
+  outline: 3px dashed #aa00ff;
+  background-color: #fce4ec !important;
+}
+
+.controls {
+  margin-top: 30px;
+}
+
+button {
+  margin: 6px;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  background: linear-gradient(to right, #5c6bc0, #3949ab);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background: linear-gradient(to right, #3f51b5, #1a237e);
+}
+
+
+
+   /*
+   body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      text-align: center;
+      background-color: #f0f4f8;
+      color: #333;
+    }
+
+    .header-container {
+      background-color: #fbfcfb;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      width: 60%;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .controls {
+      margin-bottom: 20px;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .grandparent {
+      background-color: #ffe0b2;
+      padding: 20px;
+      margin: 10px auto;
+      width: 60%;
+      border: 2px solid #ff9800;
+    }
+
+    .parent {
+      background-color: #c8e6c9;
+      padding: 15px;
+      margin: 10px;
+      border: 2px solid #4caf50;
+    }
+
+    .child {
+      background-color: #bbdefb;
+      padding: 10px;
+      margin: 5px;
+      border: 2px solid #2196f3;
+    }
+
+    .highlight {
+      outline: 3px solid red;
+      background-color: yellow !important;
+    }
+      */
+  </style>
+</head>
+
+
+<body>
+ 
+  <h1>Interactive DOM Traversal and Manipulation</h1>
+  <div class="header-container">
+    <header>
+      
+  
+      <h2>Student Profile</h2>
+      <p><strong>Complete Name:</strong> Marianne L. Texon</p>
+      <p><strong>Sex:</strong> Female</p>
+      <p><strong>Address:</strong> Santa Maria Lagonoy, Camarines Sur</p>
+      <p><strong>Course, Year, and Section:</strong> BSIT 2B</p>
+      <p><strong>Name of School:</strong> Partido State University</p>
+      <p><strong>Semester and Academic Year:</strong> 2nd Sem AY 2024-2025</p>
+      <p><strong>Course Code and Title:</strong> PF2 - Event Driven Programming</p>
+      <p><strong>Name of Subject Instructor:</strong> Prof. Arjay Abio</p>
+    </header>
+  </div>
+
+  <!-- DOM Tree -->
+  <div class="grandparent" onclick="selectNode(event)">
+    Grandparent
+    <div class="parent" onclick="selectNode(event)">
+      Parent 1
+      <div class="child" onclick="selectNode(event)">Child 1.1</div>
+      <div class="child" onclick="selectNode(event)">Child 1.2</div>
+    </div>
+    <div class="parent" onclick="selectNode(event)">
+      Parent 2
+      <div class="child" onclick="selectNode(event)">Child 2.1</div>
+      <div class="child" onclick="selectNode(event)">Child 2.2</div>
+    </div>
+  </div>
+
+  <script>
+    let selectedNode = null;
+
+    // Highlight the clicked node
+    function selectNode(event) {
+      event.stopPropagation(); // Prevent event bubbling
+      if (selectedNode) {
+        selectedNode.classList.remove('highlight');
+      }
+      selectedNode = event.currentTarget;
+      selectedNode.classList.add('highlight');
+    }
+
+    // Move up to parent node
+    function traverseUp() {
+      if (!selectedNode) return alert("Please select a node.");
+      const parent = selectedNode.parentElement.closest('.grandparent, .parent');
+      if (parent) {
+        updateSelection(parent);
+      } else {
+        alert("No parent available.");
+      }
+    }
+
+    // Move down to first child element
+    function traverseDown() {
+      if (!selectedNode) return alert("Please select a node.");
+      const child = selectedNode.querySelector('.parent, .child');
+      if (child) {
+        updateSelection(child);
+      } else {
+        alert("No child available.");
+      }
+    }
+
+    // Move to next sibling
+    function traverseNextSibling() {
+      if (!selectedNode) return alert("Please select a node.");
+      let next = selectedNode.nextElementSibling;
+      while (next && !hasSameType(next)) {
+        next = next.nextElementSibling;
+      }
+      if (next) {
+        updateSelection(next);
+      } else {
+        alert("No next sibling available.");
+      }
+    }
+
+    // Move to previous sibling
+    function traversePreviousSibling() {
+      if (!selectedNode) return alert("Please select a node.");
+      let prev = selectedNode.previousElementSibling;
+      while (prev && !hasSameType(prev)) {
+        prev = prev.previousElementSibling;
+      }
+      if (prev) {
+        updateSelection(prev);
+      } else {
+        alert("No previous sibling available.");
+      }
+    }
+
+    // Add child based on selected node type
+    function addChild() {
+      if (!selectedNode) return alert("Please select a node.");
+      if (selectedNode.classList.contains('grandparent')) {
+        const newParent = document.createElement('div');
+        newParent.className = 'parent';
+        newParent.textContent = 'New Parent';
+        newParent.onclick = selectNode;
+
+        for (let i = 1; i <= 2; i++) {
+          const newChild = document.createElement('div');
+          newChild.className = 'child';
+          newChild.textContent = `Child ${Math.floor(Math.random() * 1000)}`;
+          newChild.onclick = selectNode;
+          newParent.appendChild(newChild);
+        }
+        selectedNode.appendChild(newParent);
+      } else if (selectedNode.classList.contains('parent')) {
+        const newChild = document.createElement('div');
+        newChild.className = 'child';
+        newChild.textContent = `Child ${Math.floor(Math.random() * 1000)}`;
+        newChild.onclick = selectNode;
+        selectedNode.appendChild(newChild);
+      } else {
+        alert("Cannot add child to a child node.");
+      }
+    }
+
+    // Delete selected node with restrictions
+    function deleteNode() {
+      if (!selectedNode) return alert("Please select a node.");
+      if (selectedNode.classList.contains('grandparent')) {
+        return alert("Cannot delete the grandparent node.");
+      }
+      const parent = selectedNode.parentElement;
+      selectedNode.remove();
+      selectedNode = null;
+      if (parent.classList.contains('grandparent') || parent.classList.contains('parent')) {
+        updateSelection(parent);
+      }
+    }
+
+    // Helper: check if sibling is same type (class)
+    function hasSameType(el) {
+      return el.classList.contains('grandparent') ||
+             el.classList.contains('parent') ||
+             el.classList.contains('child');
+    }
+
+    // Update selection to a new node
+    function updateSelection(newNode) {
+      if (selectedNode) selectedNode.classList.remove('highlight');
+      selectedNode = newNode;
+      selectedNode.classList.add('highlight');
+    }
+  </script>
+
+  
+  <div class="controls">
+    <button onclick="traverseUp()">Traverse Up</button>
+    <button onclick="traverseDown()">Traverse Down</button>
+    <button onclick="traverseNextSibling()">Next Sibling</button>
+    <button onclick="traversePreviousSibling()">Previous Sibling</button>
+    <button onclick="addChild()">Add Child</button>
+    <button onclick="deleteNode()">Delete Selected</button>
+  </div>
+
+</body>
+</html>
